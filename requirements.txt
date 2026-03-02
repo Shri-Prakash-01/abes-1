@@ -12,3 +12,4 @@ cryptography==41.0.5
 requests==2.31.0
 email-validator==2.2.0  # Updated to non-yanked version
 gunicorn==21.2.0         # ADD THIS - for production server
+reportlab==4.2.5
