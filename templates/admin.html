@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .admin-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .admin-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+    
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 20px 0;
+    }
+    
+    .recent-activity {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .activity-item {
+        padding: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .status-badge {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    
+    .status-active {
+        background: #28a745;
+    }
+    
+    .status-warning {
+        background: #ffc107;
+    }
+    
+    .status-danger {
+        background: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="fas fa-crown me-2 text-warning"></i>Admin Dashboard
+            </h2>
+            <p class="text-muted">Welcome back, {{ current_user.username }}. Here's what's happening with your platform.</p>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="admin-card d-flex align-items-center">
+                <div class="admin-icon bg-gradient-primary me-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Total Users</h6>
+                    <h3 class="mb-0">{{ total_users }}</h3>
+                    <small class="text-success">
+                        <i class="fas fa-arrow-up"></i> +12% this month
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="admin-card d-flex align-items-center">
+                <div class="admin-icon bg-gradient-success me-3">
+                    <i class="fas fa-file"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Total Documents</h6>
+                    <h3 class="mb-0">{{ total_docs }}</h3>
+                    <small class="text-success">
+                        <i class="fas fa-arrow-up"></i> +5% this week
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="admin-card d-flex align-items-center">
+                <div class="admin-icon bg-gradient-info me-3">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Total Views</h6>
+                    <h3 class="mb-0">{{ total_views }}</h3>
+                    <small class="text-warning">
+                        <i class="fas fa-exclamation-triangle"></i> {{ screenshot_count }} screenshot attempts
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="admin-card d-flex align-items-center">
+                <div class="admin-icon bg-gradient-warning me-3">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Storage Used</h6>
+                    <h3 class="mb-0">{{ total_size_mb }} MB</h3>
+                    <small>{{ active_docs }} active documents</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="admin-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Access Analytics (Last 7 Days)</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary active">Daily</button>
+                        <button class="btn btn-sm btn-outline-primary">Weekly</button>
+                        <button class="btn btn-sm btn-outline-primary">Monthly</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="accessChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="admin-card">
+                <h5 class="mb-3">Document Distribution</h5>
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="docTypeChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span><span class="status-badge bg-primary"></span> PDF</span>
+                        <span>45%</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span><span class="status-badge bg-success"></span> Images</span>
+                        <span>30%</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span><span class="status-badge bg-info"></span> Documents</span>
+                        <span>25%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity & Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="admin-card">
+                <h5 class="mb-3">Recent Activity</h5>
+                <div class="recent-activity">
+                    {% for log in recent_views %}
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span class="status-badge {% if log.screenshot_detected %}status-danger{% else %}status-active{% endif %}"></span>
+                                <strong>{{ log.viewer_ip }}</strong> viewed 
+                                <span class="text-primary">{{ log.document.original_filename if log.document else 'Unknown' }}</span>
+                            </div>
+                            <small class="text-muted">{{ log.viewed_at.strftime('%H:%M') }}</small>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-globe me-1"></i>{{ log.browser }} on {{ log.os }}
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="admin-card">
+                <h5 class="mb-3">System Health</h5>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label>CPU Usage</label>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: 23%"></div>
+                            </div>
+                            <small class="text-muted">23% - Normal</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label>Memory Usage</label>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-info" style="width: 45%"></div>
+                            </div>
+                            <small class="text-muted">45% - Normal</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h5 class="mb-3">Quick Actions</h5>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="location.href='{{ url_for('admin.users') }}'">
+                        <i class="fas fa-users me-2"></i>Manage Users
+                    </button>
+                    <button class="btn btn-outline-success" onclick="location.href='{{ url_for('admin.documents') }}'">
+                        <i class="fas fa-file me-2"></i>Manage Documents
+                    </button>
+                    <button class="btn btn-outline-info" onclick="location.href='{{ url_for('admin.logs') }}'">
+                        <i class="fas fa-history me-2"></i>View Full Logs
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="systemBackup()">
+                        <i class="fas fa-download me-2"></i>Backup System
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Access Chart
+    const ctx1 = document.getElementById('accessChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: {{ chart_data|map(attribute='date')|list|tojson }},
+            datasets: [{
+                label: 'Views',
+                data: {{ chart_data|map(attribute='views')|list|tojson }},
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Document Type Chart
+    const ctx2 = document.getElementById('docTypeChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['PDF', 'Images', 'Documents'],
+            datasets: [{
+                data: [45, 30, 25],
+                backgroundColor: ['#667eea', '#28a745', '#17a2b8']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    function systemBackup() {
+        alert('Initiating system backup...');
+        // Implement backup logic
+    }
+</script>
+{% endblock %}
+

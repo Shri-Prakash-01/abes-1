@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Secure Loading{% endblock %}
+
+{% block extra_css %}
+<style>
+    .loading-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        margin: 20px 0;
+        overflow: hidden;
+    }
+    
+    .lock-animation {
+        width: 200px;
+        height: 200px;
+        margin: 0 auto 30px;
+        position: relative;
+    }
+    
+    .lock-body {
+        width: 120px;
+        height: 100px;
+        background: #fff;
+        border-radius: 20px;
+        position: absolute;
+        bottom: 20px;
+        left: 40px;
+        animation: lockPulse 2s infinite;
+    }
+    
+    .lock-shackle {
+        width: 60px;
+        height: 60px;
+        border: 15px solid #fff;
+        border-bottom: none;
+        border-radius: 50% 50% 0 0;
+        position: absolute;
+        top: 20px;
+        left: 70px;
+        animation: shackleMove 2s infinite;
+    }
+    
+    @keyframes lockPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.9; }
+    }
+    
+    @keyframes shackleMove {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .progress-bar-custom {
+        width: 300px;
+        height: 4px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 20px auto;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: #fff;
+        width: 0%;
+        animation: progressLoad 3s infinite;
+    }
+    
+    @keyframes progressLoad {
+        0% { width: 0%; }
+        50% { width: 70%; }
+        100% { width: 100%; }
+    }
+    
+    .security-text {
+        color: #fff;
+        font-size: 1.2rem;
+        margin-top: 20px;
+        animation: textFade 2s infinite;
+    }
+    
+    @keyframes textFade {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+    }
+    
+    .particle {
+        position: absolute;
+        background: rgba(255,255,255,0.5);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: float 3s infinite;
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(0) rotate(0deg); }
+        100% { transform: translateY(-100px) rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="loading-container position-relative">
+    <!-- Floating particles -->
+    {% for i in range(20) %}
+    <div class="particle" style="
+        width: {{ range(2, 8) | random }}px;
+        height: {{ range(2, 8) | random }}px;
+        left: {{ range(0, 100) | random }}%;
+        top: {{ range(0, 100) | random }}%;
+        animation-delay: {{ range(0, 2000) | random / 1000 }}s;
+    "></div>
+    {% endfor %}
+    
+    <div class="text-center">
+        <div class="lock-animation">
+            <div class="lock-shackle"></div>
+            <div class="lock-body"></div>
+        </div>
+        
+        <div class="progress-bar-custom">
+            <div class="progress-fill"></div>
+        </div>
+        
+        <div class="security-text" id="loadingMessage">
+            Initializing secure vault...
+        </div>
+        
+        <div class="mt-4">
+            <i class="fas fa-shield-alt text-white-50 me-2"></i>
+            <i class="fas fa-lock text-white-50 me-2"></i>
+            <i class="fas fa-eye-slash text-white-50"></i>
+        </div>
+    </div>
+</div>
+
+<script>
+    const messages = [
+        "Initializing secure vault...",
+        "Encrypting your session...",
+        "Verifying security protocols...",
+        "Establishing secure connection...",
+        "Loading protection features...",
+        "Ready to secure your documents!"
+    ];
+    
+    let index = 0;
+    const messageElement = document.getElementById('loadingMessage');
+    
+    setInterval(() => {
+        index = (index + 1) % messages.length;
+        messageElement.style.opacity = '0';
+        setTimeout(() => {
+            messageElement.textContent = messages[index];
+            messageElement.style.opacity = '1';
+        }, 500);
+    }, 2000);
+    
+    // Redirect after animation
+    setTimeout(() => {
+        window.location.href = "{{ url_for('index') }}";
+    }, 5000);
+</script>
+{% endblock %}

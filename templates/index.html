@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Secure Document Sharing{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 100px 0;
+        margin-top: -56px;
+        border-radius: 0 0 50% 50% / 20px;
+    }
+    
+    .feature-card {
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+    
+    .floating-lock {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
+    
+    .security-badge {
+        background: rgba(255,255,255,0.1);
+        border-radius: 50px;
+        padding: 10px 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .stats-counter {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section text-center">
+    <div class="container">
+        <div class="floating-lock mb-4">
+            <i class="fas fa-shield-alt fa-5x"></i>
+        </div>
+        <h1 class="display-4 fw-bold animate__animated animate__fadeInDown">
+            Secure Document Sharing
+        </h1>
+        <p class="lead animate__animated animate__fadeInUp">
+            Share sensitive documents with enterprise-grade security, watermarking, and access controls
+        </p>
+        
+        <div class="mt-5 animate__animated animate__fadeIn">
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-3">
+                    <i class="fas fa-user-plus me-2"></i>Get Started
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            {% else %}
+                <a href="{{ url_for('doc.upload') }}" class="btn btn-light btn-lg">
+                    <i class="fas fa-upload me-2"></i>Upload Document
+                </a>
+            {% endif %}
+        </div>
+        
+        <!-- Security Badges -->
+        <div class="mt-5 d-flex justify-content-center gap-3 flex-wrap">
+            <span class="security-badge">
+                <i class="fas fa-lock me-2"></i>256-bit Encryption
+            </span>
+            <span class="security-badge">
+                <i class="fas fa-water me-2"></i>Dynamic Watermarking
+            </span>
+            <span class="security-badge">
+                <i class="fas fa-eye-slash me-2"></i>Screenshot Protection
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container my-5">
+    <h2 class="text-center mb-5">Why Choose SecureVault?</h2>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card text-center">
+                <i class="fas fa-clock fa-3x text-primary mb-3"></i>
+                <h3>Expiring Links</h3>
+                <p>Set automatic expiration for your shared documents. Control access duration.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card text-center">
+                <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                <h3>View Limits</h3>
+                <p>Restrict number of views per document. Perfect for sensitive information.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card text-center">
+                <i class="fas fa-fingerprint fa-3x text-info mb-3"></i>
+                <h3>Dynamic Watermarks</h3>
+                <p>Viewer information is watermarked on each document in real-time.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card text-center">
+                <i class="fas fa-ban fa-3x text-danger mb-3"></i>
+                <h3>Screenshot Detection</h3>
+                <p>Detect and log screenshot attempts immediately.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card text-center">
+                <i class="fas fa-history fa-3x text-warning mb-3"></i>
+                <h3>Access Logs</h3>
+                <p>Complete audit trail of who viewed what and when.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card text-center">
+                <i class="fas fa-qrcode fa-3x text-secondary mb-3"></i>
+                <h3>QR Sharing</h3>
+                <p>Generate QR codes for quick and secure mobile access.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="stats-counter">10K+</div>
+                <p>Documents Secured</p>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-counter">50K+</div>
+                <p>Secure Views</p>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-counter">100%</div>
+                <p>Uptime</p>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-counter">24/7</div>
+                <p>Monitoring</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="container my-5 text-center">
+    <h2 class="mb-4">Ready to secure your documents?</h2>
+    <p class="lead mb-4">Join thousands of users who trust SecureVault for their sensitive data</p>
+    <a href="{{ url_for('loading') }}" class="btn btn-primary btn-lg">
+        <i class="fas fa-rocket me-2"></i>Get Started Now
+    </a>
+</div>
+{% endblock %}

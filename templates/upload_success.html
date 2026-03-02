@@ -1,0 +1,513 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .success-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        animation: fadeIn 1s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .success-card {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        max-width: 800px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        text-align: center;
+        animation: slideUp 0.8s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        color: #4CAF50;
+        margin-bottom: 1rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .success-card h2 {
+        color: #333;
+        font-size: 2.2em;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .success-message {
+        color: #666;
+        font-size: 1.1em;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .document-details {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        text-align: left;
+        border-left: 4px solid #4CAF50;
+    }
+
+    .detail-row {
+        display: flex;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        border-bottom: 1px dashed #ddd;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .detail-label {
+        width: 120px;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .detail-value {
+        flex: 1;
+        color: #333;
+    }
+
+    .secure-link-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        color: white;
+    }
+
+    .secure-link-section h3 {
+        margin-bottom: 1rem;
+        font-size: 1.3em;
+    }
+
+    .link-container {
+        display: flex;
+        gap: 10px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 8px;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .secure-link {
+        flex: 1;
+        background: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 6px;
+        font-size: 0.9em;
+        color: #333;
+        font-family: monospace;
+    }
+
+    .copy-btn {
+        background: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        color: #667eea;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .share-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .share-btn {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9em;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .share-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn-email { background: #ea4335; }
+    .btn-whatsapp { background: #25D366; }
+    .btn-linkedin { background: #0077b5; }
+    .btn-twitter { background: #000000; }
+    .btn-qr { background: #667eea; }
+
+    .security-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255,255,255,0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        margin-top: 1rem;
+        font-size: 0.9em;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+    }
+
+    /* Confetti animation */
+    .confetti {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+    }
+
+    .confetti-piece {
+        position: absolute;
+        width: 10px;
+        height: 20px;
+        top: -20px;
+        opacity: 0.6;
+    }
+
+    @keyframes confettiFall {
+        0% { transform: translateY(0) rotate(0deg); }
+        100% { transform: translateY(100vh) rotate(720deg); }
+    }
+
+    /* QR Modal */
+    .qr-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .qr-modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        max-width: 400px;
+        animation: modalPop 0.3s ease-out;
+    }
+
+    @keyframes modalPop {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .close-btn {
+        padding: 0.5rem 1rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 1rem;
+    }
+
+    .close-btn:hover {
+        background: #764ba2;
+    }
+</style>
+
+<div class="success-container">
+    <div class="success-card">
+        <!-- Confetti animation -->
+        <div class="confetti" id="confetti"></div>
+
+        <div class="success-icon">✅</div>
+        
+        <h2>Upload Successful!</h2>
+        <p class="success-message">Your document has been securely uploaded to the vault.</p>
+
+        <div class="document-details">
+            <h3 style="margin-bottom: 1rem; color: #333;">Document Details</h3>
+            <div class="detail-row">
+                <span class="detail-label">Filename:</span>
+                <span class="detail-value">{{ document.original_filename }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Size:</span>
+                <span class="detail-value">{{ (document.file_size / 1024)|round(2) }} KB</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Type:</span>
+                <span class="detail-value">{{ document.file_type }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Uploaded:</span>
+                <span class="detail-value">{{ document.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Expires:</span>
+                <span class="detail-value">{{ document.expiry_time.strftime('%Y-%m-%d') if document.expiry_time else 'Never' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">View Limit:</span>
+                <span class="detail-value">{{ document.view_limit if document.view_limit else 'Unlimited' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Watermark:</span>
+                <span class="detail-value">{{ 'Enabled' if document.watermark_enabled else 'Disabled' }}</span>
+            </div>
+        </div>
+
+        <div class="secure-link-section">
+            <h3>🔗 Your Secure Access Link</h3>
+            <p style="margin-bottom: 1rem; opacity: 0.9;">Share this link with authorized viewers only</p>
+            
+            <div class="link-container">
+                <input type="text" class="secure-link" id="secureLink" 
+                       value="{{ url_for('doc.view', token=document.token, _external=True) }}" readonly>
+                <button class="copy-btn" onclick="copyToClipboard()">
+                    <span id="copyText">Copy Link</span>
+                </button>
+            </div>
+            
+            <!-- Share Buttons -->
+            <div class="share-buttons">
+                <button class="share-btn btn-email" onclick="shareViaEmail()">
+                    <span>📧</span> Email
+                </button>
+                <button class="share-btn btn-whatsapp" onclick="shareViaWhatsApp()">
+                    <span>📱</span> WhatsApp
+                </button>
+                <button class="share-btn btn-linkedin" onclick="shareViaLinkedIn()">
+                    <span>💼</span> LinkedIn
+                </button>
+                <button class="share-btn btn-twitter" onclick="shareViaTwitter()">
+                    <span>𝕏</span> Twitter
+                </button>
+                <button class="share-btn btn-qr" onclick="showQRCode()">
+                    <span>📲</span> QR Code
+                </button>
+            </div>
+            
+            <div class="security-badge">
+                <span>🔒</span>
+                <span>AES-256 Encryption</span>
+                <span>•</span>
+                <span>⚡ Auto-expires</span>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ url_for('doc.dashboard') }}" class="btn btn-primary">
+                <span>📁</span> Go to Dashboard
+            </a>
+            <a href="{{ url_for('doc.upload') }}" class="btn btn-secondary">
+                <span>📤</span> Upload Another
+            </a>
+        </div>
+
+        <p style="margin-top: 1.5rem; color: #999; font-size: 0.9em;">
+            <span>🔐</span> This link is secure and will expire automatically
+        </p>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="qr-modal" id="qrModal">
+    <div class="qr-modal-content">
+        <h3 style="margin-bottom: 1rem;">QR Code</h3>
+        <div id="qrCodeContainer" style="margin: 1rem auto;"></div>
+        <p style="margin: 1rem 0; color: #666;">Scan to access document</p>
+        <button class="close-btn" onclick="closeQRModal()">Close</button>
+    </div>
+</div>
+
+<script>
+    // Copy to clipboard function
+    function copyToClipboard() {
+        const linkInput = document.getElementById('secureLink');
+        linkInput.select();
+        linkInput.setSelectionRange(0, 99999);
+        
+        navigator.clipboard.writeText(linkInput.value).then(() => {
+            const copyText = document.getElementById('copyText');
+            const originalText = copyText.textContent;
+            copyText.textContent = 'Copied! ✅';
+            
+            setTimeout(() => {
+                copyText.textContent = originalText;
+            }, 2000);
+        });
+    }
+
+    // Share functions
+    function shareViaEmail() {
+        const link = document.getElementById('secureLink').value;
+        const subject = encodeURIComponent('Secure Document Shared With You');
+        const body = encodeURIComponent(`I've shared a secure document with you. View it here: ${link}\n\nThis link is secure and will expire automatically.`);
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    }
+
+    function shareViaWhatsApp() {
+        const link = document.getElementById('secureLink').value;
+        const text = encodeURIComponent(`Secure document shared with you: ${link}`);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+
+    function shareViaLinkedIn() {
+        const link = document.getElementById('secureLink').value;
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`, '_blank');
+    }
+
+    function shareViaTwitter() {
+        const link = document.getElementById('secureLink').value;
+        const text = encodeURIComponent('Secure document shared with me');
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(link)}`, '_blank');
+    }
+
+    function showQRCode() {
+        const link = document.getElementById('secureLink').value;
+        const qrContainer = document.getElementById('qrCodeContainer');
+        qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}" alt="QR Code" style="border-radius: 10px;">`;
+        document.getElementById('qrModal').style.display = 'flex';
+    }
+
+    function closeQRModal() {
+        document.getElementById('qrModal').style.display = 'none';
+    }
+
+    // Confetti animation
+    function createConfetti() {
+        const confettiContainer = document.getElementById('confetti');
+        const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffcc5c'];
+        
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti-piece');
+            
+            const left = Math.random() * 100;
+            const size = Math.random() * 10 + 5;
+            const duration = Math.random() * 3 + 2;
+            const delay = Math.random() * 2;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            confetti.style.left = left + '%';
+            confetti.style.width = size + 'px';
+            confetti.style.height = size * 1.5 + 'px';
+            confetti.style.background = color;
+            confetti.style.animation = `confettiFall ${duration}s linear ${delay}s infinite`;
+            
+            confettiContainer.appendChild(confetti);
+        }
+    }
+
+    // Create confetti on page load
+    window.addEventListener('load', createConfetti);
+
+    // Auto-clean confetti after 10 seconds
+    setTimeout(() => {
+        const confetti = document.getElementById('confetti');
+        if (confetti) {
+            confetti.innerHTML = '';
+        }
+    }, 10000);
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('qrModal');
+        if (event.target == modal) {
+            closeQRModal();
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,670 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #0a0a0f;
+    }
+
+    .dashboard-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+        padding: 2rem;
+    }
+
+    /* Header */
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1rem 2rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+    }
+
+    .header-left h1 {
+        color: #fff;
+        font-size: 1.8rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #fff, #a5b4fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .header-left p {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    .upload-btn {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.2s;
+    }
+
+    .stat-card:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(59, 130, 246, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+    }
+
+    .stat-content h3 {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-number {
+        color: white;
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+    /* Search Bar */
+    .search-section {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 0.5rem 1rem;
+        width: 300px;
+    }
+
+    .search-box i {
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    .search-box input {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 0.9rem;
+        width: 100%;
+        outline: none;
+    }
+
+    .search-box input::placeholder {
+        color: #94a3b8;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .filter-btn {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: #94a3b8;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+        background: rgba(59, 130, 246, 0.1);
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .filter-btn.active {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    /* Documents Grid - HORIZONTAL CARDS */
+    .documents-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .document-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        display: grid;
+        grid-template-columns: 3fr 0.8fr 0.8fr 0.8fr 1fr 1fr 2fr;
+        align-items: center;
+        gap: 1rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.2s;
+    }
+
+    .document-card:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(59, 130, 246, 0.3);
+        transform: translateX(5px);
+    }
+
+    /* File Info */
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .file-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #3b82f6;
+        font-size: 1.25rem;
+    }
+
+    .file-details h4 {
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .file-details span {
+        color: #94a3b8;
+        font-size: 0.75rem;
+    }
+
+    /* Metric Cells */
+    .metric-cell {
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .metric-cell.small {
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+
+    /* Views Cell */
+    .views-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .views-progress {
+        width: 60px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        border-radius: 2px;
+    }
+
+    .views-text {
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-align: center;
+        min-width: 80px;
+    }
+
+    .status-active {
+        background: rgba(34, 197, 94, 0.1);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .status-expired {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .status-limited {
+        background: rgba(245, 158, 11, 0.1);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        background: rgba(255, 255, 255, 0.05);
+        color: #94a3b8;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        text-decoration: none;
+    }
+
+    .action-btn:hover {
+        background: #3b82f6;
+        color: white;
+        transform: translateY(-2px);
+        border-color: #3b82f6;
+    }
+
+    .action-btn.delete:hover {
+        background: #ef4444;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        color: #94a3b8;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: white;
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #94a3b8;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Toast */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 1000;
+    }
+
+    /* Loading */
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: #94a3b8;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .document-card {
+            grid-template-columns: 2fr 0.8fr 0.8fr 0.8fr 1fr 1fr 1.5fr;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .document-card {
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons {
+            grid-column: span 6;
+            justify-content: flex-end;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="header-left">
+            <h1>Document Vault</h1>
+            <p>Manage and share your documents securely</p>
+        </div>
+        <a href="{{ url_for('doc.upload') }}" class="upload-btn">
+            <i class="fas fa-plus"></i>
+            <span>Upload Document</span>
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-content">
+                <h3>Total Documents</h3>
+                <div class="stat-number">{{ stats.total if stats else 0 }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-eye"></i></div>
+            <div class="stat-content">
+                <h3>Total Views</h3>
+                <div class="stat-number">{{ stats.views if stats else 0 }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-link"></i></div>
+            <div class="stat-content">
+                <h3>Active Links</h3>
+                <div class="stat-number">{{ stats.active if stats else 0 }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-content">
+                <h3>Expired</h3>
+                <div class="stat-number">{{ stats.expired if stats else 0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-section">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search documents..." onkeyup="searchDocuments()">
+        </div>
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterDocuments('all')">All</button>
+            <button class="filter-btn" onclick="filterDocuments('active')">Active</button>
+            <button class="filter-btn" onclick="filterDocuments('expired')">Expired</button>
+            <button class="filter-btn" onclick="filterDocuments('images')">Images</button>
+            <button class="filter-btn" onclick="filterDocuments('pdfs')">PDFs</button>
+        </div>
+    </div>
+
+    <!-- Documents Grid - HORIZONTAL CARDS -->
+    {% if documents %}
+    <div class="documents-grid" id="documentsGrid">
+        {% for doc in documents %}
+        <div class="document-card" data-filetype="{{ doc.file_type }}" data-status="{% if doc.expiry_time and doc.expiry_time <= now() %}expired{% elif doc.view_limit and doc.view_count >= doc.view_limit %}limited{% else %}active{% endif %}">
+            <!-- File Info -->
+            <div class="file-info">
+                <div class="file-icon">
+                    {% if doc.file_type and doc.file_type.startswith('image') %}
+                        <i class="fas fa-image"></i>
+                    {% elif doc.file_type == 'application/pdf' %}
+                        <i class="fas fa-file-pdf"></i>
+                    {% else %}
+                        <i class="fas fa-file-alt"></i>
+                    {% endif %}
+                </div>
+                <div class="file-details">
+                    <h4>{{ doc.original_filename }}</h4>
+                    <span>Uploaded {{ doc.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+            </div>
+
+            <!-- Size -->
+            <div class="metric-cell small">{{ (doc.file_size / 1024)|round(1) }} KB</div>
+
+            <!-- Uploaded -->
+            <div class="metric-cell small">{{ doc.created_at.strftime('%m/%d/%Y') }}</div>
+
+            <!-- Expires -->
+            <div class="metric-cell">
+                {% if doc.expiry_time %}
+                    {% if doc.expiry_time > now() %}
+                        {{ doc.expiry_time.strftime('%m/%d/%Y') }}
+                    {% else %}
+                        <span style="color: #f87171;">Expired</span>
+                    {% endif %}
+                {% else %}
+                    <span style="color: #94a3b8;">Never</span>
+                {% endif %}
+            </div>
+
+            <!-- Views -->
+            <div class="views-cell">
+                <div class="views-progress">
+                    {% if doc.view_limit %}
+                        {% set percentage = (doc.view_count / doc.view_limit * 100)|int %}
+                        <div class="progress-bar" style="width: {{ percentage }}%"></div>
+                    {% endif %}
+                </div>
+                <span class="views-text">{{ doc.view_count }}/{{ doc.view_limit if doc.view_limit else '∞' }}</span>
+            </div>
+
+            <!-- Status -->
+            <div>
+                {% if doc.expiry_time and doc.expiry_time <= now() %}
+                    <span class="status-badge status-expired">Expired</span>
+                {% elif doc.view_limit and doc.view_count >= doc.view_limit %}
+                    <span class="status-badge status-limited">Limit Reached</span>
+                {% else %}
+                    <span class="status-badge status-active">Active</span>
+                {% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div class="action-buttons">
+                <a href="{{ url_for('doc.view', token=doc.token) }}" class="action-btn" target="_blank" title="View">
+                    <i class="fas fa-eye"></i>
+                </a>
+                <button onclick="copyLink('{{ url_for('doc.view', token=doc.token, _external=True) }}')" class="action-btn" title="Copy Link">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <a href="{{ url_for('doc.regenerate', doc_id=doc.id) }}" class="action-btn" title="New Link">
+                    <i class="fas fa-sync-alt"></i>
+                </a>
+                <a href="{{ url_for('doc.revoke', doc_id=doc.id) }}" class="action-btn" title="Revoke" onclick="return confirm('Revoke access to this document?')">
+                    <i class="fas fa-ban"></i>
+                </a>
+                <a href="{{ url_for('doc.delete', doc_id=doc.id) }}" class="action-btn delete" title="Delete" onclick="return confirm('Delete this document permanently?')">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+        <h3>No documents yet</h3>
+        <p>Upload your first document to get started</p>
+        <a href="{{ url_for('doc.upload') }}" class="upload-btn" style="display: inline-flex;">Upload Now</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast">
+    <i class="fas fa-check-circle" style="color: #4ade80;"></i>
+    <span id="toastMessage"></span>
+</div>
+
+<script>
+    // Copy link to clipboard
+    function copyLink(link) {
+        navigator.clipboard.writeText(link).then(() => {
+            showToast('Link copied to clipboard!');
+        });
+    }
+
+    // Show toast message
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastMessage').textContent = message;
+        toast.style.display = 'flex';
+        
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }
+
+    // Search documents
+    function searchDocuments() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toUpperCase();
+        const cards = document.querySelectorAll('.document-card');
+        
+        cards.forEach(card => {
+            const filename = card.querySelector('.file-details h4').textContent.toUpperCase();
+            if (filename.indexOf(filter) > -1) {
+                card.style.display = 'grid';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Filter documents
+    function filterDocuments(type) {
+        // Update active filter button
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        const cards = document.querySelectorAll('.document-card');
+        
+        cards.forEach(card => {
+            const filetype = card.dataset.filetype;
+            const status = card.dataset.status;
+            
+            if (type === 'all') {
+                card.style.display = 'grid';
+            } else if (type === 'active' && status === 'active') {
+                card.style.display = 'grid';
+            } else if (type === 'expired' && (status === 'expired' || status === 'limited')) {
+                card.style.display = 'grid';
+            } else if (type === 'images' && filetype && filetype.startsWith('image')) {
+                card.style.display = 'grid';
+            } else if (type === 'pdfs' && filetype === 'application/pdf') {
+                card.style.display = 'grid';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Auto-hide flash messages
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 5000);
+</script>
+{% endblock %}

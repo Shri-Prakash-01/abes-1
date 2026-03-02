@@ -1,0 +1,537 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #1a1a1a;
+        color: #333;
+        overflow: hidden;
+    }
+
+    .viewer-container {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    /* Security Header */
+    .security-header {
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 0.5rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .watermark-text {
+        color: #ff4444;
+        font-weight: 600;
+        letter-spacing: 1px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    .security-badge {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .badge {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 0.25rem 0.75rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50px;
+        font-size: 0.8rem;
+    }
+
+    /* Main Viewer */
+    .document-viewer {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .viewer-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 90%;
+        max-height: 80vh;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: slideUp 0.5s ease-out;
+        position: relative;
+        overflow: auto;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* PDF Viewer */
+    .pdf-viewer {
+        width: 100%;
+        height: 70vh;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Image Viewer */
+    .image-viewer {
+        max-width: 100%;
+        max-height: 70vh;
+        object-fit: contain;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Document Info */
+    .document-info {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+
+    .info-left {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #666;
+    }
+
+    .info-item i {
+        color: #667eea;
+    }
+
+    .view-count {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    /* Warning Overlay */
+    .warning-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .warning-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        max-width: 400px;
+        animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+
+    .warning-card i {
+        font-size: 4rem;
+        color: #ff4444;
+        margin-bottom: 1rem;
+    }
+
+    .warning-card h3 {
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .warning-card p {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+
+    .warning-card button {
+        padding: 0.75rem 2rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .warning-card button:hover {
+        background: #764ba2;
+    }
+
+    /* Disable right-click and selection */
+    .no-select {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+        display: none;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255,255,255,0.3);
+        border-top: 5px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="viewer-container no-select" id="viewerContainer">
+    <!-- Security Header with Watermark -->
+    <div class="security-header">
+        <div class="watermark-text">
+            🔒 SECURE VIEWER • {{ current_user.email if current_user.is_authenticated else 'Guest' }} • {{ request.remote_addr }}
+        </div>
+        <div class="security-badge">
+            <span class="badge">
+                <span>👁️</span> View {{ document.view_count }}/{{ document.view_limit if document.view_limit else '∞' }}
+            </span>
+            <span class="badge">
+                <span>⏰</span> Expires: {{ document.expiry_time.strftime('%Y-%m-%d') if document.expiry_time else 'Never' }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Main Document Viewer -->
+    <div class="document-viewer">
+        <div class="viewer-card">
+            {% if document.file_type and document.file_type.startswith('image') %}
+                <!-- Image Viewer -->
+                <img src="{{ url_for('static', filename='uploads/' + document.filename) }}" 
+                     class="image-viewer" 
+                     alt="{{ document.original_filename }}"
+                     oncontextmenu="return false;"
+                     ondragstart="return false;"
+                     onload="setupImageProtection()">
+            {% else %}
+                <!-- PDF Viewer -->
+                <iframe src="{{ url_for('static', filename='uploads/' + document.filename) }}#toolbar=0&navpanes=0&scrollbar=0"
+                        class="pdf-viewer"
+                        oncontextmenu="return false;"
+                        onload="setupPDFProtection()"></iframe>
+            {% endif %}
+
+            <!-- Document Info -->
+            <div class="document-info">
+                <div class="info-left">
+                    <div class="info-item">
+                        <span>📄</span> {{ document.original_filename }}
+                    </div>
+                    <div class="info-item">
+                        <span>📏</span> {{ (document.file_size / 1024)|round(2) }} KB
+                    </div>
+                    <div class="info-item">
+                        <span>🕒</span> Uploaded: {{ document.created_at.strftime('%Y-%m-%d') }}
+                    </div>
+                </div>
+                <div class="view-count">
+                    View {{ document.view_count }} / {{ document.view_limit if document.view_limit else '∞' }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Overlay (shown on screenshot attempt) -->
+    <div class="warning-overlay" id="warningOverlay">
+        <div class="warning-card">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>⚠️ Security Alert</h3>
+            <p>Screenshots are not allowed for security reasons. This attempt has been logged.</p>
+            <button onclick="closeWarning()">I Understand</button>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>Loading secure document...</p>
+    </div>
+</div>
+
+<script>
+    // Disable right click
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        showWarning('Screenshots and right-click are disabled');
+        return false;
+    });
+
+    // Disable keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Disable PrintScreen
+        if (e.key === 'PrintScreen') {
+            e.preventDefault();
+            showWarning('Screenshots are disabled');
+            logScreenshotAttempt();
+            return false;
+        }
+        
+        // Disable Ctrl+P (Print)
+        if (e.ctrlKey && e.key === 'p') {
+            e.preventDefault();
+            showWarning('Printing is disabled');
+            return false;
+        }
+        
+        // Disable Ctrl+S (Save)
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            showWarning('Saving is disabled');
+            return false;
+        }
+        
+        // Disable Ctrl+Shift+I (DevTools)
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+            showWarning('Developer tools are disabled');
+            return false;
+        }
+        
+        // Disable F12 (DevTools)
+        if (e.key === 'F12') {
+            e.preventDefault();
+            showWarning('Developer tools are disabled');
+            return false;
+        }
+    });
+
+    // Disable drag and drop
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable copy
+    document.addEventListener('copy', function(e) {
+        e.preventDefault();
+        showWarning('Copying is disabled');
+        return false;
+    });
+
+    // Disable cut
+    document.addEventListener('cut', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable paste
+    document.addEventListener('paste', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Detect tab visibility change (possible screenshot attempt)
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            // User switched tabs - possible screenshot attempt
+            setTimeout(function() {
+                if (!document.hidden) {
+                    showWarning('Tab switching detected');
+                    logScreenshotAttempt();
+                }
+            }, 100);
+        }
+    });
+
+    // Detect window blur (possible screenshot tool)
+    window.addEventListener('blur', function() {
+        setTimeout(function() {
+            if (document.hasFocus()) {
+                showWarning('Window focus changed');
+            }
+        }, 100);
+    });
+
+    // Function to show warning
+    function showWarning(message) {
+        const overlay = document.getElementById('warningOverlay');
+        const warningCard = overlay.querySelector('.warning-card p');
+        warningCard.textContent = message || 'Security violation detected. This attempt has been logged.';
+        overlay.style.display = 'flex';
+        
+        // Auto-hide after 3 seconds
+        setTimeout(function() {
+            closeWarning();
+        }, 3000);
+    }
+
+    function closeWarning() {
+        document.getElementById('warningOverlay').style.display = 'none';
+    }
+
+    // Log screenshot attempt to server
+    function logScreenshotAttempt() {
+        fetch('/doc/screenshot-detected', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                document_id: {{ document.id }},
+                timestamp: new Date().toISOString()
+            })
+        });
+    }
+
+    // Setup image protection
+    function setupImageProtection() {
+        const images = document.querySelectorAll('.image-viewer');
+        images.forEach(img => {
+            // Disable dragging
+            img.addEventListener('dragstart', e => e.preventDefault());
+            
+            // Add transparent overlay to prevent right-click save
+            const overlay = document.createElement('div');
+            overlay.style.position = 'absolute';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.background = 'transparent';
+            overlay.style.zIndex = '10';
+            
+            const container = img.parentElement;
+            if (container && container.style.position !== 'relative') {
+                container.style.position = 'relative';
+                container.appendChild(overlay);
+            }
+        });
+    }
+
+    // Setup PDF protection
+    function setupPDFProtection() {
+        const iframes = document.querySelectorAll('.pdf-viewer');
+        iframes.forEach(iframe => {
+            try {
+                // Disable iframe context menu
+                iframe.contentWindow.document.addEventListener('contextmenu', e => e.preventDefault());
+            } catch(e) {
+                // Cross-origin restrictions - ignore
+            }
+        });
+    }
+
+    // Detect DevTools opening
+    let devToolsOpen = false;
+    const element = new Image();
+    Object.defineProperty(element, 'id', {
+        get: function() {
+            devToolsOpen = true;
+            showWarning('Developer tools detected');
+            logScreenshotAttempt();
+        }
+    });
+    
+    setInterval(function() {
+        devToolsOpen = false;
+        console.log(element);
+        if (devToolsOpen) {
+            showWarning('Developer tools detected');
+            logScreenshotAttempt();
+        }
+    }, 1000);
+
+    // Show loading spinner
+    window.addEventListener('load', function() {
+        document.getElementById('loadingSpinner').style.display = 'none';
+    });
+
+    // Prevent zooming (common in mobile screenshots)
+    document.addEventListener('gesturestart', function(e) {
+        e.preventDefault();
+    });
+
+    // Detect multiple rapid clicks (possible screenshot tool)
+    let clickCount = 0;
+    let clickTimer = null;
+    
+    document.addEventListener('click', function() {
+        clickCount++;
+        
+        if (clickCount === 1) {
+            clickTimer = setTimeout(function() {
+                clickCount = 0;
+            }, 500);
+        } else if (clickCount >= 3) {
+            clearTimeout(clickTimer);
+            clickCount = 0;
+            showWarning('Rapid clicking detected');
+        }
+    });
+</script>
+{% endblock %}
