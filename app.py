@@ -6,7 +6,7 @@ from models import db
 from datetime import datetime
 from models.user import User
 import os
-from routes import auth_bp, doc_bp, admin_bp  # Import from route
+
 # Initialize extensions
 login_manager = LoginManager()
 mail = Mail()
@@ -70,6 +70,15 @@ def create_app():
         return {'now': datetime.utcnow}
     return app
 
+# This is the important part for Render
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
+    # For local development
     app.run(debug=True, host='0.0.0.0', port=5000)
+else:
+    # For production (Render) - get port from environment variable
+    import os
+    port = int(os.environ.get('PORT', 10000))
+    # Note: In production, you don't call app.run() here
+    # Gunicorn will run the 'app' object directly
